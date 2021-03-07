@@ -1,0 +1,87 @@
+#!/bin/sh
+OUTDIR="../webdir"
+
+TMPDIR="/tmp/sitegen/"
+
+mkdir $TMPDIR
+
+mkdir $OUTDIR
+rm -rf $OUTDIR/*
+
+LISTSTART="<li>"
+LISTEND="</li>"
+cd content
+CONTENTDIRS="$(find -type d | sed "s/\.\///" | sed "1d")"
+HOMEDIRS="$(find -maxdepth 1 -type d | sed "s/\.\///" | sed "1d")"
+cd ..
+
+cat ./layouts/top.html ./layouts/home.html ./layouts/bot.html > $OUTDIR/index.html
+
+for dir in $CONTENTDIRS
+do
+	mkdir $OUTDIR/$dir
+done
+
+cd content
+mdfiles="$(find . -type f)"
+cd ..
+for mdfile in $mdfiles # Generate html from markdown
+do
+	if echo $mdfile | grep -v -q ".draft$"; then
+		smu content/$mdfile > $TMPDIR/page.html
+		cat ./layouts/top.html $TMPDIR/page.html ./layouts/bot.html >\
+			"$(echo "$OUTDIR/$mdfile" | sed "s/\.md/\.html/" )"
+	#else
+	#	echo "Draft"
+	fi
+done
+
+cp -r ./static/* $OUTDIR
+
+# Generate index.html files for all folders
+CURRENTDIR="$(pwd)"
+cd $OUTDIR
+OUTDIRS="$(find -type d | sed "s/\.\///" | sed "1d")"
+for dir in $OUTDIRS
+do
+	DIRCONTENT="$(ls -1a $dir | sed "1d")"
+
+	LISTITEMS="$(for f in $DIRCONTENT
+	do
+		case "$f" in
+			*.html)  class="layout" ;;
+			*.gif)   class="image" ;;
+			*.png)   class="image" ;;
+			*.jpg)   class="image" ;;
+			*.jpeg)  class="image" ;;
+			*.epub)  class="book" ;;
+			*.pdf)   class="pdf" ;;
+			..)      class="back" ;;
+			*.*)     class="unknown" ;;
+			*)       class="folder" ;;
+		esac
+		if echo $f | grep -q "\.\." ;
+		then outname=".. (Up a Dir)"
+		else outname="$f"
+		fi
+
+		if [ "$class" = "folder" ] ;
+		then echo "<li class=\"$class\" ><a href="/$dir/$f/">$outname</a></li>"
+		else echo "<li class=\"$class\" ><a href="/$dir/$f">$outname</a></li>"
+		fi
+		
+	done)"
+	echo "<h3>Directory of $dir</h3>" > $TMPDIR/dirhead.html
+	echo "<ul>$LISTITEMS</ul>" > $TMPDIR/dirindex.html
+	cat $CURRENTDIR/layouts/top.html $TMPDIR/dirhead.html $TMPDIR/dirindex.html $CURRENTDIR/layouts/bot.html > $dir/index.html
+done
+cd $CURRENTDIR
+#LISTITEMS="$(for dir in $HOMEDIRS
+#do
+#	echo "<li><a href="/$dir" >$dir/</a></li>"
+#done)"
+#
+#echo "<ul>$LISTITEMS</ul>" > $TMPDIR/list.html
+
+
+rm -rf $TMPDIR

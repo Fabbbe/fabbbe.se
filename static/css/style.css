@@ -1,0 +1,49 @@
+body {
+	background: #FFF;
+}
+
+.title a {
+	color: black;
+	text-decoration: none;
+}
+.title a:hover {
+	text-decoration: underline;
+}
+
+.wrapper {
+	max-width: 700px;
+	margin: 0 auto;
+}
+
+.footer {
+	padding: 20px 0;
+	color: gray;
+	font-size: 9pt;
+}
+
+code {
+	background: #EEE;
+	padding: 2px;
+}
+
+ul li.folder {
+	list-style-image: url('/icons/folder.gif');
+}
+ul li.layout {
+	list-style-image: url('/icons/layout.gif');
+}
+ul li.image {
+	list-style-image: url('/icons/image.gif');
+}
+ul li.back {
+	list-style-image: url('/icons/back.gif');
+}
+ul li.book {
+	list-style-image: url('/icons/quill.gif');
+}
+ul li.pdf {
+	list-style-image: url('/icons/pdf.gif');
+}
+ul li.unknown {
+	list-style-image: url('/icons/unknown.gif');
+}
